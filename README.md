@@ -1,2 +1,0 @@
-# Script-
-Mi primer script
