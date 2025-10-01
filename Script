@@ -1,0 +1,129 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- Forzar creación en PlayerGui (NO CoreGui)
+local PlayerGui = player:WaitForChild("PlayerGui")
+
+-- Si ya existe, borramos la anterior para no duplicar
+if PlayerGui:FindFirstChild("MixupHub") then
+    PlayerGui.MixupHub:Destroy()
+end
+
+-- Crear ScreenGui en PlayerGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MixupHub"
+ScreenGui.ResetOnSpawn = false -- se mantiene aunque el jugador respawnee
+ScreenGui.Parent = PlayerGui
+
+-- Crear Frame principal
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 200, 0, 150)
+MainFrame.Position = UDim2.new(0, 20, 0, 200)
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MainFrame.BackgroundTransparency = 0.2
+MainFrame.BorderSizePixel = 0
+MainFrame.Parent = ScreenGui
+
+-- Bordes redondeados
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.Parent = MainFrame
+
+----------------------------------------------------------
+-- BOTÓN "Ver jugadores"
+----------------------------------------------------------
+local SeePlayersButton = Instance.new("TextButton")
+SeePlayersButton.Size = UDim2.new(1, -20, 0, 40)
+SeePlayersButton.Position = UDim2.new(0, 10, 0, 10)
+SeePlayersButton.Text = "Ver jugadores"
+SeePlayersButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+SeePlayersButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SeePlayersButton.Parent = MainFrame
+
+local SeePlayersCorner = Instance.new("UICorner")
+SeePlayersCorner.CornerRadius = UDim.new(0, 10)
+SeePlayersCorner.Parent = SeePlayersButton
+
+local seePlayersActive = false
+
+-- Función para activar/desactivar aura verde
+local function toggleSeePlayers()
+    seePlayersActive = not seePlayersActive
+    if seePlayersActive then
+        SeePlayersButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0) -- Verde cuando activo
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                if not plr.Character:FindFirstChild("MixupHighlight") then
+                    local highlight = Instance.new("Highlight")
+                    highlight.Name = "MixupHighlight"
+                    highlight.FillColor = Color3.fromRGB(0, 255, 0)
+                    highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
+                    highlight.Adornee = plr.Character
+                    highlight.Parent = plr.Character
+                end
+            end
+        end
+    else
+        SeePlayersButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr.Character and plr.Character:FindFirstChild("MixupHighlight") then
+                plr.Character.MixupHighlight:Destroy()
+            end
+        end
+    end
+end
+
+SeePlayersButton.MouseButton1Click:Connect(toggleSeePlayers)
+
+----------------------------------------------------------
+-- BOTÓN "Guardar posición"
+----------------------------------------------------------
+local savePos
+local SavePosButton = Instance.new("TextButton")
+SavePosButton.Size = UDim2.new(1, -20, 0, 40)
+SavePosButton.Position = UDim2.new(0, 10, 0, 60)
+SavePosButton.Text = "Guardar posición"
+SavePosButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+SavePosButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SavePosButton.Parent = MainFrame
+
+local SavePosCorner = Instance.new("UICorner")
+SavePosCorner.CornerRadius = UDim.new(0, 10)
+SavePosCorner.Parent = SavePosButton
+
+SavePosButton.MouseButton1Click:Connect(function()
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        savePos = player.Character.HumanoidRootPart.CFrame
+        SavePosButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+        SavePosButton.Text = "Posición guardada!"
+        task.wait(1.5)
+        SavePosButton.Text = "Guardar posición"
+        SavePosButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    end
+end)
+
+----------------------------------------------------------
+-- BOTÓN "Teletransportar"
+----------------------------------------------------------
+local TPButton = Instance.new("TextButton")
+TPButton.Size = UDim2.new(1, -20, 0, 40)
+TPButton.Position = UDim2.new(0, 10, 0, 110)
+TPButton.Text = "Teletransportar"
+TPButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+TPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TPButton.Parent = MainFrame
+
+local TPCorner = Instance.new("UICorner")
+TPCorner.CornerRadius = UDim.new(0, 10)
+TPCorner.Parent = TPButton
+
+TPButton.MouseButton1Click:Connect(function()
+    if savePos and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = savePos
+        TPButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+        TPButton.Text = "Teletransportado!"
+        task.wait(1.5)
+        TPButton.Text = "Teletransportar"
+        TPButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    end
+end)
